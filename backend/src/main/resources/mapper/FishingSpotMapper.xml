@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fishing.mapper.FishingSpotMapper">
+
+    <resultMap id="BaseResultMap" type="com.fishing.entity.FishingSpot">
+        <id column="spot_id" property="spotId"/>
+        <result column="user_id" property="userId"/>
+        <result column="spot_name" property="spotName"/>
+        <result column="water_type" property="waterType"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="address" property="address"/>
+        <result column="description" property="description"/>
+        <result column="images" property="images" typeHandler="com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler"/>
+        <result column="is_shared" property="isShared"/>
+        <result column="is_favorite" property="isFavorite"/>
+        <result column="record_count" property="recordCount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <resultMap id="NearbySpotResultMap" type="java.util.HashMap" extends="BaseResultMap">
+        <result column="distance" property="distance"/>
+    </resultMap>
+
+    <select id="selectNearbySpots" resultMap="NearbySpotResultMap">
+        SELECT
+            fs.*,
+            ROUND(
+                6371 * 2 * ASIN(
+                    SQRT(
+                        POW(SIN((RADIANS(#{lat}) - RADIANS(fs.latitude)) / 2), 2)
+                        + COS(RADIANS(#{lat})) * COS(RADIANS(fs.latitude))
+                        * POW(SIN((RADIANS(#{lng}) - RADIANS(fs.longitude)) / 2), 2)
+                    )
+                ),
+                2
+            ) AS distance
+        FROM fishing_spot fs
+        WHERE fs.user_id = #{userId}
+          AND fs.deleted = 0
+        HAVING distance &lt;= #{radius}
+        ORDER BY distance ASC
+    </select>
+
+    <select id="selectSpotWithRecordCount" resultType="java.util.HashMap">
+        SELECT
+            fs.spot_id AS spotId,
+            fs.spot_name AS spotName,
+            fs.user_id AS userId,
+            COUNT(fr.record_id) AS recordCount
+        FROM fishing_spot fs
+        LEFT JOIN fishing_record fr ON fs.spot_id = fr.spot_id AND fr.deleted = 0
+        WHERE fs.deleted = 0
+        GROUP BY fs.spot_id, fs.spot_name, fs.user_id
+        ORDER BY recordCount DESC
+    </select>
+
+</mapper>

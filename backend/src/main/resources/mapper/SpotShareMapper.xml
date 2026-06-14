@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fishing.mapper.SpotShareMapper">
+
+    <select id="selectShareList" resultType="java.util.HashMap">
+        SELECT
+            ss.share_id AS shareId,
+            ss.spot_id AS spotId,
+            ss.share_user_id AS shareUserId,
+            ss.share_title AS shareTitle,
+            ss.share_content AS shareContent,
+            ss.blurred_lng AS blurredLng,
+            ss.blurred_lat AS blurredLat,
+            ss.view_count AS viewCount,
+            ss.like_count AS likeCount,
+            ss.share_status AS shareStatus,
+            ss.create_time AS createTime,
+            su.nickname AS nickname,
+            su.avatar AS avatar,
+            fs.spot_name AS spotName,
+            fs.water_type AS waterType
+        FROM spot_share ss
+        INNER JOIN sys_user su ON ss.share_user_id = su.user_id AND su.deleted = 0
+        INNER JOIN fishing_spot fs ON ss.spot_id = fs.spot_id AND fs.deleted = 0
+        <where>
+            ss.deleted = 0
+            AND ss.share_status = 1
+            <if test="keyword != null and keyword != ''">
+                AND (ss.share_title LIKE CONCAT('%', #{keyword}, '%')
+                     OR ss.share_content LIKE CONCAT('%', #{keyword}, '%')
+                     OR fs.spot_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="waterType != null">
+                AND fs.water_type = #{waterType}
+            </if>
+        </where>
+        ORDER BY ss.create_time DESC
+    </select>
+
+    <update id="incrementViewCount">
+        UPDATE spot_share
+        SET view_count = view_count + 1
+        WHERE share_id = #{shareId}
+          AND deleted = 0
+    </update>
+
+    <update id="incrementLikeCount">
+        UPDATE spot_share
+        SET like_count = like_count + 1
+        WHERE share_id = #{shareId}
+          AND deleted = 0
+    </update>
+
+</mapper>

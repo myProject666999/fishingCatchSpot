@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fishing.mapper.FishingRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.fishing.entity.FishingRecord">
+        <id column="record_id" property="recordId"/>
+        <result column="spot_id" property="spotId"/>
+        <result column="user_id" property="userId"/>
+        <result column="fishing_date" property="fishingDate"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="fishing_method" property="fishingMethod"/>
+        <result column="bait" property="bait"/>
+        <result column="weather" property="weather"/>
+        <result column="temperature" property="temperature"/>
+        <result column="wind_direction" property="windDirection"/>
+        <result column="wind_level" property="windLevel"/>
+        <result column="water_level" property="waterLevel"/>
+        <result column="total_count" property="totalCount"/>
+        <result column="total_weight" property="totalWeight"/>
+        <result column="remark" property="remark"/>
+        <result column="images" property="images" typeHandler="com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <select id="selectBySpotId" resultMap="BaseResultMap">
+        SELECT
+            fr.*
+        FROM fishing_record fr
+        WHERE fr.spot_id = #{spotId}
+          AND fr.deleted = 0
+        ORDER BY fr.fishing_date DESC, fr.create_time DESC
+    </select>
+
+    <select id="selectMonthlyStatistics" resultType="java.util.HashMap">
+        SELECT
+            DATE_FORMAT(fr.fishing_date, '%Y-%m') AS month,
+            SUM(fr.total_count) AS totalCount,
+            SUM(fr.total_weight) AS totalWeight
+        FROM fishing_record fr
+        <where>
+            fr.deleted = 0
+            <if test="userId != null">
+                AND fr.user_id = #{userId}
+            </if>
+            <if test="startMonth != null and startMonth != ''">
+                AND DATE_FORMAT(fr.fishing_date, '%Y-%m') &gt;= #{startMonth}
+            </if>
+            <if test="endMonth != null and endMonth != ''">
+                AND DATE_FORMAT(fr.fishing_date, '%Y-%m') &lt;= #{endMonth}
+            </if>
+            <if test="waterType != null or fishingMethod != null">
+                AND EXISTS (
+                    SELECT 1 FROM fishing_spot fs
+                    WHERE fs.spot_id = fr.spot_id
+                      AND fs.deleted = 0
+                    <if test="waterType != null">
+                        AND fs.water_type = #{waterType}
+                    </if>
+                )
+            </if>
+            <if test="fishingMethod != null">
+                AND fr.fishing_method = #{fishingMethod}
+            </if>
+        </where>
+        GROUP BY DATE_FORMAT(fr.fishing_date, '%Y-%m')
+        ORDER BY month ASC
+    </select>
+
+</mapper>
