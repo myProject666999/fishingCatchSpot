@@ -2,7 +2,7 @@ import request from './request'
 
 export function add(data) {
   return request({
-    url: '/record',
+    url: '/record/add',
     method: 'post',
     data
   })
@@ -10,7 +10,7 @@ export function add(data) {
 
 export function update(data) {
   return request({
-    url: '/record',
+    url: '/record/update',
     method: 'put',
     data
   })
@@ -30,26 +30,26 @@ export function getDetail(id) {
   })
 }
 
-export function listBySpot(spotId, params) {
+export function listBySpot(spotId, data) {
   return request({
-    url: `/record/spot/${spotId}`,
-    method: 'get',
-    params
+    url: `/record/listBySpot/${spotId}`,
+    method: 'post',
+    data
   })
 }
 
-export function list(params) {
+export function list(data) {
   return request({
     url: '/record/list',
-    method: 'get',
-    params
+    method: 'post',
+    data
   })
 }
 
-export function statistics(params) {
+export function statistics(data) {
   return request({
-    url: '/record/statistics/season',
-    method: 'get',
-    params
+    url: '/record/statistics',
+    method: 'post',
+    data
   })
 }

@@ -13,7 +13,7 @@ public interface SpotShareService {
 
     SpotShareVO getDetail(Long shareId);
 
-    void like(Long shareId);
+    void like(Long userId, Long shareId);
 
     void delete(Long userId, Long shareId);
 }

@@ -2,7 +2,7 @@ import request from './request'
 
 export function add(data) {
   return request({
-    url: '/spot',
+    url: '/spot/add',
     method: 'post',
     data
   })
@@ -10,7 +10,7 @@ export function add(data) {
 
 export function update(data) {
   return request({
-    url: '/spot',
+    url: '/spot/update',
     method: 'put',
     data
   })
@@ -30,11 +30,11 @@ export function getDetail(id) {
   })
 }
 
-export function list(params) {
+export function list(data) {
   return request({
     url: '/spot/list',
-    method: 'get',
-    params
+    method: 'post',
+    data
   })
 }
 
@@ -48,7 +48,7 @@ export function nearby(lng, lat, radius) {
 
 export function toggleFavorite(id) {
   return request({
-    url: `/spot/${id}/favorite`,
+    url: `/spot/toggleFavorite/${id}`,
     method: 'post'
   })
 }

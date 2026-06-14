@@ -164,14 +164,14 @@ public class SpotShareServiceImpl implements SpotShareService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void like(Long shareId) {
-        log.debug("分享点赞，shareId: {}", shareId);
+    public void like(Long userId, Long shareId) {
+        log.debug("用户点赞分享，userId: {}, shareId: {}", userId, shareId);
         SpotShare share = spotShareMapper.selectById(shareId);
         if (share == null) {
             throw new BusinessException("分享不存在");
         }
         spotShareMapper.incrementLikeCount(shareId);
-        log.debug("分享点赞完成，shareId: {}", shareId);
+        log.debug("分享点赞完成，userId: {}, shareId: {}", userId, shareId);
     }
 
     @Override

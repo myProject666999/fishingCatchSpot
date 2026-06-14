@@ -2,11 +2,11 @@
   <div class="login-container">
     <div class="login-box">
       <h2 class="login-title">渔获钓点管理系统</h2>
-      <el-form :model="loginForm" label-width="80px" class="login-form">
-        <el-form-item label="用户名">
+      <el-form :model="loginForm" :rules="rules" ref="formRef" label-width="80px" class="login-form">
+        <el-form-item label="用户名" prop="username">
           <el-input v-model="loginForm.username" placeholder="请输入用户名" />
         </el-form-item>
-        <el-form-item label="密码">
+        <el-form-item label="密码" prop="password">
           <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" show-password />
         </el-form-item>
         <el-form-item>
@@ -23,31 +23,48 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { login } from '@/api/user'
-import { saveUserId, saveUser } from '@/utils/auth'
+import { useUserStore } from '@/store/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(false)
+const formRef = ref(null)
 
 const loginForm = reactive({
-  username: 'fisher001',
-  password: '123456'
+  username: '',
+  password: ''
 })
 
+const rules = {
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+}
+
 function handleLogin() {
-  if (!loginForm.username || !loginForm.password) {
-    ElMessage.warning('请输入用户名和密码')
-    return
-  }
-  loading.value = true
-  login(loginForm).then(res => {
-    const userData = res || {}
-    const userId = userData.id || userData.userId || 1
-    saveUserId(userId)
-    saveUser(userData)
-    ElMessage.success('登录成功')
-    router.push('/dashboard')
-  }).finally(() => {
-    loading.value = false
+  formRef.value.validate(valid => {
+    if (!valid) return
+    loading.value = true
+    login(loginForm)
+      .then(res => {
+        const data = res.data || res
+        const userId = data?.userId
+        if (!userId) {
+          ElMessage.error('用户信息异常，缺少userId')
+          return
+        }
+        localStorage.setItem('userId', userId)
+        userStore.setUserInfo({
+          userId,
+          username: data.username || loginForm.username,
+          nickname: data.nickname || data.username || loginForm.username,
+          token: data.token || ''
+        })
+        ElMessage.success('登录成功')
+        router.push('/spot')
+      })
+      .finally(() => {
+        loading.value = false
+      })
   })
 }
 </script>

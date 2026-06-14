@@ -18,59 +18,80 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping
+@RequestMapping("/api/spot")
 @Validated
 public class FishingSpotController {
 
     @Autowired
     private FishingSpotService fishingSpotService;
 
-    @PostMapping("/api/spot/add")
-    public Result<Void> add(@RequestHeader("X-User-Id") Long userId, @RequestBody @Valid FishingSpotDTO dto) {
+    @PostMapping("/add")
+    public Result<Void> add(@RequestHeader(value = "X-User-Id", required = false) Long userId, @RequestBody @Valid FishingSpotDTO dto) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
         log.debug("add invoked, userId={}, param={}", userId, dto);
         fishingSpotService.add(userId, dto);
         return Result.success();
     }
 
-    @PutMapping("/api/spot/update")
-    public Result<Void> update(@RequestHeader("X-User-Id") Long userId, @RequestBody @Valid FishingSpotDTO dto) {
+    @PutMapping("/update")
+    public Result<Void> update(@RequestHeader(value = "X-User-Id", required = false) Long userId, @RequestBody @Valid FishingSpotDTO dto) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
         log.debug("update invoked, userId={}, param={}", userId, dto);
         fishingSpotService.update(userId, dto);
         return Result.success();
     }
 
-    @DeleteMapping("/api/spot/{spotId}")
-    public Result<Void> delete(@RequestHeader("X-User-Id") Long userId, @PathVariable Long spotId) {
-        log.debug("delete invoked, userId={}, spotId={}", userId, spotId);
-        fishingSpotService.delete(userId, spotId);
-        return Result.success();
-    }
-
-    @GetMapping("/api/spot/{spotId}")
-    public Result<FishingSpotVO> getDetail(@RequestHeader("X-User-Id") Long userId, @PathVariable Long spotId) {
-        log.debug("getDetail invoked, userId={}, spotId={}", userId, spotId);
-        FishingSpotVO fishingSpotVO = fishingSpotService.getDetail(userId, spotId);
-        return Result.success(fishingSpotVO);
-    }
-
-    @PostMapping("/api/spot/list")
-    public Result<PageResult<FishingSpotVO>> listByUser(@RequestHeader("X-User-Id") Long userId, @RequestBody PageQuery query) {
+    @PostMapping("/list")
+    public Result<PageResult<FishingSpotVO>> listByUser(@RequestHeader(value = "X-User-Id", required = false) Long userId, @RequestBody PageQuery query) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
         log.debug("listByUser invoked, userId={}, param={}", userId, query);
         PageResult<FishingSpotVO> pageResult = fishingSpotService.listByUser(userId, query);
         return Result.success(pageResult);
     }
 
-    @GetMapping("/api/spot/nearby")
-    public Result<List<SpotNearbyVO>> listNearby(@RequestHeader("X-User-Id") Long userId, @RequestParam BigDecimal lng, @RequestParam BigDecimal lat, @RequestParam(defaultValue = "5") Double radius) {
+    @GetMapping("/nearby")
+    public Result<List<SpotNearbyVO>> listNearby(@RequestHeader(value = "X-User-Id", required = false) Long userId, @RequestParam BigDecimal lng, @RequestParam BigDecimal lat, @RequestParam(defaultValue = "5") Double radius) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
         log.debug("listNearby invoked, userId={}, lng={}, lat={}, radius={}", userId, lng, lat, radius);
         List<SpotNearbyVO> list = fishingSpotService.listNearby(userId, lng, lat, radius);
         return Result.success(list);
     }
 
-    @PostMapping("/api/spot/toggleFavorite/{spotId}")
-    public Result<Void> toggleFavorite(@RequestHeader("X-User-Id") Long userId, @PathVariable Long spotId) {
+    @PostMapping("/toggleFavorite/{spotId}")
+    public Result<Void> toggleFavorite(@RequestHeader(value = "X-User-Id", required = false) Long userId, @PathVariable Long spotId) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
         log.debug("toggleFavorite invoked, userId={}, spotId={}", userId, spotId);
         fishingSpotService.toggleFavorite(userId, spotId);
+        return Result.success();
+    }
+
+    @GetMapping("/{spotId}")
+    public Result<FishingSpotVO> getDetail(@RequestHeader(value = "X-User-Id", required = false) Long userId, @PathVariable Long spotId) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
+        log.debug("getDetail invoked, userId={}, spotId={}", userId, spotId);
+        FishingSpotVO fishingSpotVO = fishingSpotService.getDetail(userId, spotId);
+        return Result.success(fishingSpotVO);
+    }
+
+    @DeleteMapping("/{spotId}")
+    public Result<Void> delete(@RequestHeader(value = "X-User-Id", required = false) Long userId, @PathVariable Long spotId) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
+        log.debug("delete invoked, userId={}, spotId={}", userId, spotId);
+        fishingSpotService.delete(userId, spotId);
         return Result.success();
     }
 }

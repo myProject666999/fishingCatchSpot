@@ -2,17 +2,17 @@ import request from './request'
 
 export function share(data) {
   return request({
-    url: '/share',
+    url: '/share/add',
     method: 'post',
     data
   })
 }
 
-export function list(params) {
+export function list(data) {
   return request({
     url: '/share/list',
-    method: 'get',
-    params
+    method: 'post',
+    data
   })
 }
 
@@ -25,7 +25,7 @@ export function getDetail(id) {
 
 export function like(id) {
   return request({
-    url: `/share/${id}/like`,
+    url: `/share/like/${id}`,
     method: 'post'
   })
 }

@@ -2,7 +2,7 @@ import request from './request'
 
 export function add(data) {
   return request({
-    url: '/favorite',
+    url: '/favorite/add',
     method: 'post',
     data
   })
@@ -15,10 +15,10 @@ export function deleteById(id) {
   })
 }
 
-export function list(params) {
+export function list(data) {
   return request({
     url: '/favorite/list',
-    method: 'get',
-    params
+    method: 'post',
+    data
   })
 }

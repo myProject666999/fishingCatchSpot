@@ -63,13 +63,21 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getUser, removeUserId } from '@/utils/auth'
+import { getUser, removeUserId, getUserId } from '@/utils/auth'
 
 const route = useRoute()
 const router = useRouter()
+
+onMounted(() => {
+  const userId = getUserId()
+  if (!userId) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+  }
+})
 
 const userInfo = computed(() => getUser() || {})
 const nickname = computed(() => userInfo.value.nickname || userInfo.value.username || '用户')

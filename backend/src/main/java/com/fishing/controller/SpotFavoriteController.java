@@ -15,31 +15,40 @@ import javax.validation.Valid;
 
 @Slf4j
 @RestController
-@RequestMapping
+@RequestMapping("/api/favorite")
 @Validated
 public class SpotFavoriteController {
 
     @Autowired
     private SpotFavoriteService spotFavoriteService;
 
-    @PostMapping("/api/favorite/add")
-    public Result<Void> add(@RequestHeader("X-User-Id") Long userId, @RequestBody @Valid SpotFavoriteDTO dto) {
+    @PostMapping("/add")
+    public Result<Void> add(@RequestHeader(value = "X-User-Id", required = false) Long userId, @RequestBody @Valid SpotFavoriteDTO dto) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
         log.debug("add invoked, userId={}, param={}", userId, dto);
         spotFavoriteService.add(userId, dto);
         return Result.success();
     }
 
-    @DeleteMapping("/api/favorite/{favoriteId}")
-    public Result<Void> delete(@RequestHeader("X-User-Id") Long userId, @PathVariable Long favoriteId) {
-        log.debug("delete invoked, userId={}, favoriteId={}", userId, favoriteId);
-        spotFavoriteService.delete(userId, favoriteId);
-        return Result.success();
-    }
-
-    @PostMapping("/api/favorite/list")
-    public Result<PageResult<SpotFavoriteVO>> listByUser(@RequestHeader("X-User-Id") Long userId, @RequestBody PageQuery query) {
+    @PostMapping("/list")
+    public Result<PageResult<SpotFavoriteVO>> listByUser(@RequestHeader(value = "X-User-Id", required = false) Long userId, @RequestBody PageQuery query) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
         log.debug("listByUser invoked, userId={}, param={}", userId, query);
         PageResult<SpotFavoriteVO> pageResult = spotFavoriteService.listByUser(userId, query);
         return Result.success(pageResult);
+    }
+
+    @DeleteMapping("/{favoriteId}")
+    public Result<Void> delete(@RequestHeader(value = "X-User-Id", required = false) Long userId, @PathVariable Long favoriteId) {
+        if (userId == null) {
+            return Result.fail(401, "请先登录");
+        }
+        log.debug("delete invoked, userId={}, favoriteId={}", userId, favoriteId);
+        spotFavoriteService.delete(userId, favoriteId);
+        return Result.success();
     }
 }
