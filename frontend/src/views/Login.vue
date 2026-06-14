@@ -24,6 +24,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { login } from '@/api/user'
 import { useUserStore } from '@/store/user'
+import { saveUserId, saveUser } from '@/utils/auth'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -52,7 +53,15 @@ function handleLogin() {
           ElMessage.error('用户信息异常，缺少userId')
           return
         }
-        localStorage.setItem('userId', userId)
+        saveUserId(userId)
+        saveUser({
+          userId,
+          username: data.username || loginForm.username,
+          nickname: data.nickname || data.username || loginForm.username,
+          avatar: data.avatar || '',
+          phone: data.phone || '',
+          email: data.email || ''
+        })
         userStore.setUserInfo({
           userId,
           username: data.username || loginForm.username,
@@ -60,7 +69,7 @@ function handleLogin() {
           token: data.token || ''
         })
         ElMessage.success('登录成功')
-        router.push('/spot')
+        router.push('/dashboard/spot')
       })
       .finally(() => {
         loading.value = false

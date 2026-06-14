@@ -195,7 +195,7 @@ function loadData() {
   })
     .then(res => {
       const data = res.data || res
-      tableData.value = data.records || data.list || data || []
+      tableData.value = Array.isArray(data) ? data : (data.records || data.list || [])
       nextTick(() => {
         updateChart(tableData.value)
       })

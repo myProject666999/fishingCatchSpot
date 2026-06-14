@@ -313,14 +313,14 @@ function removeCatchDetail(index) {
 function loadSpotList() {
   spotListApi({ pageNum: 1, pageSize: 1000 }).then(res => {
     const data = res.data || res
-    spotList.value = data.records || data.list || []
+    spotList.value = Array.isArray(data) ? data : (data.records || data.list || [])
   })
 }
 
 function loadSpeciesList() {
   speciesListApi().then(res => {
     const data = res.data || res
-    speciesList.value = data.records || data.list || []
+    speciesList.value = Array.isArray(data) ? data : (data.records || data.list || [])
   })
 }
 

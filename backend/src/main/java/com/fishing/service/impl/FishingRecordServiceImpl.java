@@ -13,7 +13,9 @@ import com.fishing.dto.StatisticsQueryDTO;
 import com.fishing.entity.CatchDetail;
 import com.fishing.entity.FishingRecord;
 import com.fishing.entity.FishingSpot;
+import com.fishing.entity.FishSpecies;
 import com.fishing.mapper.CatchDetailMapper;
+import com.fishing.mapper.FishSpeciesMapper;
 import com.fishing.mapper.FishingRecordMapper;
 import com.fishing.mapper.FishingSpotMapper;
 import com.fishing.service.FishingRecordService;
@@ -48,6 +50,9 @@ public class FishingRecordServiceImpl implements FishingRecordService {
 
     @Autowired
     private FishingSpotMapper fishingSpotMapper;
+
+    @Autowired
+    private FishSpeciesMapper fishSpeciesMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -84,6 +89,12 @@ public class FishingRecordServiceImpl implements FishingRecordService {
                 CatchDetail detail = new CatchDetail();
                 BeanUtils.copyProperties(detailDTO, detail);
                 detail.setRecordId(record.getRecordId());
+                if (detailDTO.getSpeciesId() != null && (detailDTO.getSpeciesName() == null || detailDTO.getSpeciesName().isEmpty())) {
+                    FishSpecies species = fishSpeciesMapper.selectById(detailDTO.getSpeciesId());
+                    if (species != null) {
+                        detail.setSpeciesName(species.getSpeciesName());
+                    }
+                }
                 catchDetailMapper.insert(detail);
             }
         }
@@ -133,6 +144,12 @@ public class FishingRecordServiceImpl implements FishingRecordService {
                 CatchDetail detail = new CatchDetail();
                 BeanUtils.copyProperties(detailDTO, detail);
                 detail.setRecordId(dto.getRecordId());
+                if (detailDTO.getSpeciesId() != null && (detailDTO.getSpeciesName() == null || detailDTO.getSpeciesName().isEmpty())) {
+                    FishSpecies species = fishSpeciesMapper.selectById(detailDTO.getSpeciesId());
+                    if (species != null) {
+                        detail.setSpeciesName(species.getSpeciesName());
+                    }
+                }
                 catchDetailMapper.insert(detail);
             }
         }
